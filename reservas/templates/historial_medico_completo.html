@@ -1,0 +1,66 @@
+{% extends 'dashboard.html' %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Historial Médico Completo de {{ mascota.nombre }}</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Información de la Mascota</h5>
+            <p><strong>Nombre:</strong> {{ mascota.nombre }}</p>
+            <p><strong>Edad:</strong> {{ mascota.edad }} años</p>
+            <p><strong>Raza:</strong> {{ mascota.raza }}</p>
+            <p><strong>Tipo:</strong> {{ mascota.tipo }}</p>
+            <p><strong>Sexo:</strong> {{ mascota.get_sexo_display }}</p>
+            <p><strong>Fecha de Nacimiento:</strong> {{ mascota.fecha_nacimiento }}</p>
+        </div>
+    </div>
+
+    <h3 class="mb-3">Historial Médico</h3>
+
+    {% if historiales %}
+        <div class="accordion" id="accordionHistorial">
+            {% for historial in historiales %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ historial.id }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ historial.id }}" aria-expanded="false" aria-controls="collapse{{ historial.id }}">
+                        {{ historial.fecha|date:"d M Y" }} - {{ historial.titulo }}
+                    </button>
+                </h2>
+                <div id="collapse{{ historial.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ historial.id }}" data-bs-parent="#accordionHistorial">
+                    <div class="accordion-body">
+                        <p><strong>Médico:</strong> {{ historial.medico.nombre }} {{ historial.medico.apellidos }}</p>
+                        <p><strong>Servicio:</strong> {{ historial.servicio.titulo }}</p>
+                        <p><strong>Procedimiento:</strong> {{ historial.procedimiento }}</p>
+                        <p><strong>Análisis:</strong> {{ historial.analisis }}</p>
+                        <p><strong>Diagnóstico:</strong> {{ historial.diagnostico }}</p>
+                        <p><strong>Antecedentes:</strong> {{ historial.antecedentes }}</p>
+                        <p><strong>Acompañante:</strong> {{ historial.acompanante }}</p>
+                        <hr>
+                        <h5>Detalles Adicionales</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Temperatura:</strong> {{ historial.temperatura }} °C</p>
+                                <p><strong>Peso:</strong> {{ historial.peso }} kg</p>
+                                <p><strong>Frecuencia Cardiaca:</strong> {{ historial.frecuencia_cardiaca }} bpm</p>
+                                <p><strong>Frecuencia Respiratoria:</strong> {{ historial.frecuencia_respiratoria }} rpm</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Color:</strong> {{ historial.color }}</p>
+                                <p><strong>Dieta:</strong> {{ historial.dieta }}</p>
+                                <p><strong>Esterilizado:</strong> {{ historial.esterilizado|yesno:"Sí,No" }}</p>
+                                <p><strong>Partos:</strong> {{ historial.partos|yesno:"Sí,No" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No hay historiales médicos registrados para esta mascota.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

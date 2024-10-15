@@ -1,0 +1,73 @@
+{% extends 'dashboard.html' %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h2 class="mb-4">Listado de Clientes</h2>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Correo</th>
+                    <th>Celular</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.nombre }}</td>
+                    <td>{{ cliente.apellidos }}</td>
+                    <td>{{ cliente.correo }}</td>
+                    <td>{{ cliente.celular }}</td>
+                    <td>
+                        <!-- Botón para abrir el modal -->
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#detalleClienteModal{{ cliente.id }}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+
+                        <!-- Modal para cada cliente -->
+                        <div class="modal fade" id="detalleClienteModal{{ cliente.id }}" tabindex="-1" aria-labelledby="clienteModalLabel{{ cliente.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="clienteModalLabel{{ cliente.id }}">Detalles del Cliente</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h5>Mascotas de {{ cliente.nombre }}</h5>
+
+                                        {% if cliente.mascotas.all %}
+                                            {% for mascota in cliente.mascotas.all %}
+                                                <div class="mascota-block">
+                                                    <p><strong>Nombre:</strong> {{ mascota.nombre }}</p>
+                                                    <p><strong>Edad:</strong> {{ mascota.edad }} años</p>
+                                                    <p><strong>Fecha de Nacimiento:</strong> {{ mascota.fecha_nacimiento }}</p>
+                                                    <p><strong>Tipo:</strong> {{ mascota.tipo }}</p>
+                                                    <p><strong>Raza:</strong> {{ mascota.raza }}</p>
+                                                    <p><strong>Sexo:</strong> {{ mascota.sexo }}</p>
+
+                                                    <!-- Aquí tienes el ID de la mascota -->
+                                                    <button class="btn btn-danger btn-sm mt-2 revisar-historial" onclick="window.location.href='/historial-medico-completo/{{ mascota.id }}/'">
+                                                        <i class="fas fa-notes-medical"></i> Revisar Historial
+                                                    </button>
+                                                    <hr>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p>No se encontraron mascotas para este cliente.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

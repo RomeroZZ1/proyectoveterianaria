@@ -1,0 +1,365 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veterinaria Feliz - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #023000; /* Verde oscuro */
+            --secondary-color: #166232; /* Verde más claro */
+            --accent-color: #d9f0e3; /* Verde pálido */
+            --light-color: #f0f8f0; /* Fondo claro */
+            --dark-color: #2a2a2a; /* Color oscuro */
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-color);
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background: linear-gradient(to bottom right, var(--primary-color), var(--secondary-color));
+            color: white;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .sidebar-header {
+            padding: 20px;
+            background: rgba(0,0,0,0.1);
+        }
+        .sidebar ul.components {
+            padding: 20px 0;
+        }
+        .sidebar ul li a {
+            padding: 10px;
+            font-size: 1.1em;
+            display: block;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .sidebar ul li a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .sidebar ul li.active > a {
+            background: var(--accent-color);
+            color: var(--primary-color);
+        }
+        #content {
+            width: calc(100% - 250px);
+            margin-left: 250px;
+            transition: all 0.3s;
+            padding: 20px;
+        }
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        .btn-custom {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .sidebar.active {
+                margin-left: 0;
+            }
+            #content {
+                width: 100%;
+                margin-left: 0;
+            }
+            #content.active {
+                margin-left: 250px;
+            }
+        }
+    </style>
+    {% block css %}
+    {% endblock %}
+</head>
+<body>
+    <div class="wrapper">
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3>Animalitos fieles</h3>
+            </div>
+            <ul class="list-unstyled components">
+                <li class="{% if request.path == '/dashboard/' %}active{% endif %}">
+                    <a href="{% url 'dashboard' %}">
+                        <i class="fas fa-home"></i> Inicio
+                    </a>
+                </li>                
+            
+                {% if request.user.is_authenticated and request.user.rol == 'administrador' or request.user.rol == 'medico' %}
+                <li class="{% if request.path == '/servicios/' %}active{% endif %}">
+                    <a href="{% url 'servicios' %}"><i class="fas fa-stethoscope"></i> Servicios</a>
+                </li>
+                <li class="{% if request.path == '/reservas/listar/' %}active{% endif %}">
+                    <a href="{% url 'listar_reservas' %}"><i class="fas fa-calendar-alt"></i> Reservas</a>
+                </li>
+                <li class="{% if request.path == '/clientes/listar/' %}active{% endif %}">
+                    <a href="{% url 'listar_clientes' %}">
+                        <i class="fas fa-users"></i> Clientes
+                    </a>
+                </li>                
+                {% endif %}
+
+                {% if request.user.is_authenticated and request.user.rol == 'cliente' %}
+                <li class="{% if request.path == '/mis-mascotas/' %}active{% endif %}">
+                    <a href="{% url 'mis_mascotas' %}"><i class="fas fa-paw"></i> Mis Mascotas</a>
+                </li>
+                <li class="{% if request.path == '/mis-reservas/' %}active{% endif %}">
+                    <a href="{% url 'mis_reservas' %}"><i class="fas fa-calendar-check"></i> Mis Reservas</a>
+                </li>
+                {% endif %}
+            </ul>            
+        </nav>
+
+        <div id="content">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn btn-custom">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="ms-auto">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user"></i> {{ request.user.nombre }} {{ request.user.apellidos }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                                <li><a class="dropdown-item" href="#">Perfil</a></li>
+                                <li><a class="dropdown-item" href="#">Configuración</a></li>
+                                <li>
+                                    <form method="post" action="{% url 'logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">Cerrar Sesión</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid">
+                {% block contenido %}
+                    <h2 class="mb-4">Dashboard</h2>
+                    <div class="row">
+                        <!-- Total Clientes -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card text-center">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Clientes</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h2 class="card-text">{{ total_clientes }}</h2>
+                                    <i class="fas fa-users fa-2x text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Total Médicos -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card text-center">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Médicos</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h2 class="card-text">{{ total_medicos }}</h2>
+                                    <i class="fas fa-user-md fa-2x text-success"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Total Mascotas -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card text-center">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Mascotas</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h2 class="card-text">{{ total_mascotas }}</h2>
+                                    <i class="fas fa-paw fa-2x text-warning"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Total Reservas -->
+                        <div class="col-md-3 mb-4">
+                            <div class="card text-center">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Reservas</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h2 class="card-text">{{ total_reservas }}</h2>
+                                    <i class="fas fa-calendar-alt fa-2x text-danger"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- Ingresos por Mes Chart -->
+                        <div class="col-md-8 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Ingresos de los Últimos 6 Meses</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="ingresosChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Ingresos Totales -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card text-center">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Ingresos Totales</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h2 class="card-text">${{ total_ingresos|floatformat:2 }}</h2>
+                                    <i class="fas fa-dollar-sign fa-2x text-success"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- Reservas de la Última Semana Chart -->
+                        <div class="col-md-8 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Reservas de la Última Semana</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="reservasChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Actividades Recientes -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Actividades Recientes</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        {% for actividad in actividades_recientes %}
+                                        <li class="list-group-item">
+                                            <strong>{{ actividad.cliente.nombre }} {{ actividad.cliente.apellidos }}</strong> reservó para <strong>{{ actividad.mascota.nombre }}</strong> el {{ actividad.fecha|date:"d M Y" }} a las {{ actividad.hora|time:"H:i" }}
+                                        </li>
+                                        {% empty %}
+                                        <li class="list-group-item">No hay actividades recientes.</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endblock contenido %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% block scripts %}
+    <!-- Ingresos por Mes Chart -->
+    <script>
+        const ingresosCtx = document.getElementById('ingresosChart').getContext('2d');
+        const ingresosData = {
+            labels: [
+                {% for ingreso in ingresos_por_mes %}
+                    '{{ ingreso.mes|date:"M Y" }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Ingresos en USD',
+                data: [
+                    {% for ingreso in ingresos_por_mes %}
+                        {{ ingreso.total }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(22, 98, 50, 0.7)',
+                borderColor: 'rgba(22, 98, 50, 1)',
+                borderWidth: 2
+            }]
+        };
+        const ingresosChart = new Chart(ingresosCtx, {
+            type: 'bar',
+            data: ingresosData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+    <!-- Reservas por Día Chart -->
+    <script>
+        const reservasCtx = document.getElementById('reservasChart').getContext('2d');
+        const reservasData = {
+            labels: [
+                {% for reserva in reservas_por_dia %}
+                    '{{ reserva.fecha|date:"d M" }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Reservas',
+                data: [
+                    {% for reserva in reservas_por_dia %}
+                        {{ reserva.total }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(2, 48, 0, 0.7)',
+                borderColor: 'rgba(2, 48, 0, 1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        };
+        const reservasChart = new Chart(reservasCtx, {
+            type: 'line',
+            data: reservasData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        precision: 0
+                    }
+                }
+            }
+        });
+    </script>
+
+    {% endblock %}
+</body>
+</html>

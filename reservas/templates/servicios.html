@@ -1,0 +1,109 @@
+{% extends 'dashboard.html' %}
+
+{% block css %}
+<style>
+    .form-section {
+        background-color: var(--light-color);
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .form-section h2 {
+        margin-bottom: 20px;
+    }
+    .table thead th {
+        background-color: var(--primary-color);
+        color: white;
+        text-align: center;
+    }
+    .table tbody tr {
+        text-align: center;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <h2 class="mb-4">Servicios</h2>
+
+    <!-- Formulario para crear un nuevo servicio -->
+    <div class="form-section">
+        <h2>Crear Servicio</h2>
+        <form method="post" action="{% url 'servicios' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="titulo" class="form-label">Título</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" required>
+            </div>
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción</label>
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio</label>
+                <input type="number" class="form-control" id="precio" name="precio" step="0.01" required>
+            </div>
+            <div class="mb-3">
+                <label for="tiempo" class="form-label">Tiempo</label>
+                <input type="text" class="form-control" id="tiempo" name="tiempo" placeholder="Formato: HH:MM:SS" required>
+            </div>
+            <button type="submit" class="btn btn-custom">Crear Servicio</button>
+        </form>
+    </div>
+
+    <!-- Tabla de servicios existentes -->
+    <div class="form-section">
+        <h2>Servicios Existentes</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Tiempo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for servicio in servicios %}
+                <tr>
+                    <td>{{ servicio.id }}</td>
+                    <td>{{ servicio.titulo }}</td>
+                    <td>{{ servicio.descripcion }}</td>
+                    <td>${{ servicio.precio }}</td>
+                    <td>{{ servicio.tiempo }}</td>
+                    <td>
+                        <form method="post" action="{% url 'eliminar_servicio' servicio.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">No hay servicios disponibles.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Placeholder for future JS if needed
+    });
+</script>
+{% endblock %}

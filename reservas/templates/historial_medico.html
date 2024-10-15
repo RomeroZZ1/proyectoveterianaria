@@ -1,0 +1,155 @@
+{% extends 'dashboard.html' %}
+
+{% block contenido %}
+<div class="container mt-4" style="padding-top: 20px;"> <!-- Espacio superior agregado -->
+    <!-- Bloque de mensajes -->
+    {% if messages %}
+        <div class="mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h2 class="mb-4">Historial Médico de {{ mascota.nombre }}</h2>
+    
+    <p style="font-size: 1.5em; font-weight: bold; text-transform: capitalize;">
+        Fecha: {{ fecha_actual|date:"l d" }} de {{ fecha_actual|date:"F" }} de {{ fecha_actual|date:"Y" }}
+    </p>
+
+    <h3 style="margin-top: 20px; font-weight: bold; font-size: 1.8em;">Información de la Mascota</h3>
+    
+    <div style="border: 2px solid #ccc; padding: 20px; border-radius: 8px; background-color: #f9f9f9; width: 50%; margin-top: 15px;">
+        <p><strong>Nombre:</strong> {{ mascota.nombre }}</p>
+        <p><strong>Edad:</strong> {{ mascota.edad }} años</p>
+        <p><strong>Raza:</strong> {{ mascota.raza }}</p>
+        <p><strong>Tipo:</strong> {{ mascota.tipo }}</p>
+        <p><strong>Sexo:</strong> 
+            {% if mascota.sexo == 'Macho' %}
+                <span style="color: green; font-weight: bold;">Macho</span>
+            {% else %}
+                <span style="color: green; font-weight: bold;">Hembra</span>
+            {% endif %}
+        </p>
+        <p><strong>Fecha de Nacimiento:</strong> {{ mascota.fecha_nacimiento }}</p>
+        <p><strong>Carnet de Vacunación:</strong> 
+            {% if mascota.carnet_vacunacion %}
+                <span style="color: green; font-weight: bold;">Sí</span>
+            {% else %}
+                <span style="color: red; font-weight: bold;">No</span>
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Formulario del Historial Médico -->
+    <form method="POST" style="margin-top: 20px;">
+        {% csrf_token %}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="medico" class="form-label">Medico</label>
+                <select name="medico" id="medico" class="form-control" required>
+                    {% for medico in medicos %}
+                        <option value="{{ medico.id }}">{{ medico.nombre }} {{ medico.apellidos }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="servicio" class="form-label">Servicio</label>
+                <select name="servicio" id="servicio" class="form-control" required>
+                    {% for servicio in servicios %}
+                        <option value="{{ servicio.id }}">{{ servicio.titulo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>    
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="antecedentes" class="form-label">Antecedentes o Enfermedad Actual</label>
+                <textarea class="form-control" id="antecedentes" name="antecedentes" rows="3" required></textarea>
+            </div>
+            <div class="col-md-6">
+                <label for="acompanante" class="form-label">Acompañante (Dueño u otra persona)</label>
+                <input type="text" class="form-control" id="acompanante" name="acompanante" value="{{ mascota.cliente.nombre }}" required>
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="diagnostico" class="form-label">Diagnóstico</label>
+                <textarea class="form-control" id="diagnostico" name="diagnostico" rows="3" required></textarea>
+            </div>
+        </div>
+
+        <!-- Campos para temperatura, peso, frecuencia cardíaca y respiratoria -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="temperatura" class="form-label">Temperatura</label>
+                <input type="number" step="0.1" class="form-control" id="temperatura" name="temperatura" placeholder="°C" required>
+            </div>
+            <div class="col-md-6">
+                <label for="peso" class="form-label">Peso</label>
+                <input type="number" step="0.1" class="form-control" id="peso" name="peso" placeholder="KG" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="frecuencia_cardiaca" class="form-label">Frecuencia Cardiaca</label>
+                <input type="number" class="form-control" id="frecuencia_cardiaca" name="frecuencia_cardiaca" placeholder="FC" required>
+            </div>
+            <div class="col-md-6">
+                <label for="frecuencia_respiratoria" class="form-label">Frecuencia Respiratoria</label>
+                <input type="number" class="form-control" id="frecuencia_respiratoria" name="frecuencia_respiratoria" placeholder="FR" required>
+            </div>
+        </div>
+
+        <!-- Campos para esterilización y color -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="esterilizado" class="form-label">Esterilizado</label>
+                <select class="form-select" id="esterilizado" name="esterilizado" required>
+                    <option value="si">Sí</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="color" class="form-label">Color de la mascota</label>
+                <input type="text" class="form-control" id="color" name="color" required>
+            </div>
+        </div>
+
+        <!-- Campos para dieta y otros alimentos -->
+        <div class="mb-3">
+            <label for="dieta" class="form-label">Dieta</label>
+            <input type="text" class="form-control" id="dieta" name="dieta" placeholder="Marca del concentrado o alimentos adicionales">
+        </div>
+
+        <!-- Campo para partos y procedimiento -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="partos" class="form-label">Partos</label>
+                <select class="form-select" id="partos" name="partos" required>
+                    <option value="si">Sí</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Procedimiento y análisis -->
+        <div class="mb-3">
+            <label for="procedimiento" class="form-label">Procedimiento</label>
+            <textarea class="form-control" id="procedimiento" name="procedimiento" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="analisis" class="form-label">Análisis</label>
+            <textarea class="form-control" id="analisis" name="analisis" rows="3"></textarea>
+        </div>
+
+        <!-- Botón de guardar -->
+        <button type="submit" class="btn btn-primary">Guardar Historial</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,430 @@
+{% extends 'inicio.html' %}
+{% load static %}
+
+{% block css %}
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Estilos personalizados */
+        .hero-section {
+            background: url('{% static "img/veterinaria_calendar_bg.jpg" %}') no-repeat center center;
+            background-size: cover;
+            height: 50vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #ffffff;
+        }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        .btn-book-now {
+            background-color: #166232;
+            color: white;
+            padding: 0.75rem 2rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        .btn-book-now:hover {
+            background-color: #023000;
+            transform: scale(1.05);
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+            }
+        }
+        .booking-section {
+            padding: 4rem 0;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
+        }
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #166232;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        #calendar {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #023000, #166232);
+            color: white;
+            border-bottom: none;
+        }
+        .modal-title {
+            font-weight: 600;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #166232;
+            box-shadow: 0 0 0 0.2rem rgba(22, 98, 50, 0.25);
+        }
+        .btn-custom {
+            background-color: #166232;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            background-color: #023000;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .select2-container .select2-dropdown {
+            z-index: 9999;
+        }        
+    </style>
+{% endblock %}
+
+{% block contenido %}
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Cuidamos a tus amigos peludos</h1>
+            <p class="hero-subtitle">Reserva tu cita hoy y dale a tu mascota el cuidado que se merece.</p>
+            <button class="btn btn-book-now" data-bs-toggle="modal" data-bs-target="#bookingModal">Reserva ahora</button>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="booking-section">
+            <h2 class="section-title">Elige tu cita</h2>
+            <div id="calendar"></div>
+        </section>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookingModalLabel">Crear Usuario, Mascota y Reserva</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tab Navigation -->
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="user-tab" data-bs-toggle="tab" href="#user" role="tab" aria-controls="user" aria-selected="true">Crear Usuario</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="pet-tab" data-bs-toggle="tab" href="#pet" role="tab" aria-controls="pet" aria-selected="false">Crear Mascota</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="reservation-tab" data-bs-toggle="tab" href="#reservation" role="tab" aria-controls="reservation" aria-selected="false">Crear Reserva</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <!-- Crear Usuario -->
+                        <div class="tab-pane fade show active" id="user" role="tabpanel" aria-labelledby="user-tab">
+                            <form id="userForm">
+                                <div class="mb-3">
+                                    <label for="firstName" class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="lastName" class="form-label">Apellidos</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="identification" class="form-label">Identificación</label>
+                                    <input type="text" class="form-control" id="identification" name="identification" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cellphone" class="form-label">Celular</label>
+                                    <input type="text" class="form-control" id="cellphone" name="cellphone" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Correo electrónico</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="birthdate" class="form-label">Fecha de nacimiento</label>
+                                    <input type="date" class="form-control" id="birthdate" name="birthdate">
+                                </div>
+                                <button type="button" class="btn btn-custom btn-next" data-next-tab="#pet-tab">Siguiente</button>
+                            </form>
+                        </div>
+
+                        <!-- Crear Mascota -->
+                        <div class="tab-pane fade" id="pet" role="tabpanel" aria-labelledby="pet-tab">
+                            <form id="petForm">
+                                <div class="mb-3">
+                                    <label for="petName" class="form-label">Nombre de la mascota</label>
+                                    <input type="text" class="form-control" id="petName" name="petName" required>
+                                </div>                                
+                                <div class="mb-3">
+                                    <label for="petAge" class="form-label">Edad</label>
+                                    <input type="number" class="form-control" id="petAge" name="petAge" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="petBirthdate" class="form-label">Fecha de nacimiento</label>
+                                    <input type="date" class="form-control" id="petBirthdate" name="petBirthdate" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="vaccinationCard" class="form-label">Carnet de vacunación</label>
+                                    <input type="checkbox" class="form-check-input" id="vaccinationCard" name="vaccinationCard">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="petType" class="form-label">Tipo de mascota</label>
+                                    <select class="form-select" id="petType" name="petType" required>
+                                        <option value="">Selecciona el tipo de mascota</option>
+                                        <option value="perro">Perro</option>
+                                        <option value="gato">Gato</option>
+                                        <option value="caballo">Caballo</option>
+                                        <option value="hamster">Hamster</option>
+                                        <option value="pajaro">Pájaro</option>
+                                        <option value="conejo">Conejo</option>
+                                        <option value="pez">Pez</option>
+                                        <option value="reptil">Reptil</option>
+                                        <option value="roedor">Roedor</option>
+                                        <option value="huron">Hurón</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="petBreed" class="form-label">Raza</label>
+                                    <select class="form-select" id="petBreed" name="petBreed" required>
+                                        <!-- Las opciones de raza se actualizarán dinámicamente -->
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="petSex" class="form-label">Sexo</label>
+                                    <select class="form-select" id="petSex" name="petSex" required>
+                                        <option value="macho">Macho</option>
+                                        <option value="hembra">Hembra</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn btn-custom btn-next" data-next-tab="#reservation-tab">Siguiente</button>
+                            </form>
+                        </div>
+
+                        <!-- Crear Reserva -->
+                        <div class="tab-pane fade" id="reservation" role="tabpanel" aria-labelledby="reservation-tab">
+                            <form id="reservationForm" method="POST">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="service" class="form-label">Servicios</label>
+                                    <select multiple class="form-select" id="service" name="service" required>
+                                        <!-- Las opciones de servicio se llenarán dinámicamente -->
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="reservationDate" class="form-label">Fecha</label>
+                                    <input type="date" class="form-control" id="reservationDate" name="reservationDate" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="reservationTime" class="form-label">Hora</label>
+                                    <input type="time" class="form-control" id="reservationTime" name="reservationTime" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="notes" class="form-label">Notas adicionales</label>
+                                    <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                                </div>
+                                <button type="button" class="btn btn-custom" id="saveAll">Guardar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                selectable: true,
+                select: function(info) {
+                    // Asignar la fecha seleccionada al campo del formulario
+                    document.getElementById('reservationDate').value = info.startStr.split('T')[0];
+                    // Mostrar el modal
+                    var modal = new bootstrap.Modal(document.getElementById('bookingModal'));
+                    modal.show();
+                },
+                editable: true
+            });
+            calendar.render();
+
+            // Script para manejar el botón Siguiente y avanzar a la siguiente pestaña
+            document.querySelectorAll('.btn-next').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var nextTabId = this.getAttribute('data-next-tab');
+                    var nextTab = new bootstrap.Tab(document.querySelector(nextTabId));
+                    nextTab.show();
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const petTypeSelect = document.getElementById('petType');
+            const petBreedSelect = document.getElementById('petBreed');
+        
+            petTypeSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+        
+                if (selectedType) {
+                    fetch(`/api/razas/?tipo=${selectedType}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            petBreedSelect.innerHTML = ''; // Limpia las opciones actuales
+                            data.forEach(function(raza) {
+                                const option = document.createElement('option');
+                                option.value = raza[0];
+                                option.textContent = raza[1];
+                                petBreedSelect.appendChild(option);
+                            });
+                        });
+                } else {
+                    petBreedSelect.innerHTML = ''; // Si no hay tipo seleccionado, limpiar opciones
+                }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const serviceSelect = document.getElementById('service');
+            
+            // Cargar servicios al iniciar el formulario
+            fetch('/api/servicios/')
+                .then(response => response.json())
+                .then(data => {
+                    // Limpia las opciones actuales
+                    serviceSelect.innerHTML = ''; 
+                    data.forEach(function(servicio) {
+                        const option = document.createElement('option');
+                        option.value = servicio.id;
+                        option.textContent = servicio.titulo;
+                        serviceSelect.appendChild(option);
+                    });
+        
+                    // Inicializar Select2 después de cargar los servicios
+                    $(serviceSelect).select2({
+                        placeholder: "Selecciona los servicios",
+                        allowClear: true,
+                        closeOnSelect: false,
+                        dropdownParent: $('#bookingModal')
+                    });
+                })
+                .catch(error => console.error('Error al cargar los servicios:', error));
+        });             
+    </script>
+    <script>
+        document.getElementById('saveAll').addEventListener('click', function() {
+            var userForm = new FormData(document.getElementById('userForm'));
+            
+            // Depuración: imprimir todos los pares clave-valor capturados por FormData
+            for (var pair of userForm.entries()) {
+                console.log(pair[0] + ': ' + pair[1]); 
+            }
+            
+            var petForm = new FormData(document.getElementById('petForm'));
+            var reservationForm = new FormData(document.getElementById('reservationForm'));
+        
+            // Combina todos los formularios en un solo FormData
+            for (var pair of petForm.entries()) {
+                userForm.append(pair[0], pair[1]);
+            }
+            for (var pair of reservationForm.entries()) {
+                userForm.append(pair[0], pair[1]);
+            }
+        
+            fetch('/crear-reserva/', {
+                method: 'POST',
+                body: userForm,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })            
+            .then(response => {
+                if (response.ok) {
+                    return response.json();  // Intenta parsear el JSON
+                } else {
+                    return response.text();  // En caso de error, devuelve el texto del HTML de error
+                }
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                } else {
+                    alert('Error: ' + (data.message || 'Ocurrió un error inesperado.'));
+                }
+            })
+            .catch(error => console.error('Error:', error));            
+        });
+            
+        
+        
+        // Función para obtener el token CSRF de las cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>        
+
+{% endblock %}

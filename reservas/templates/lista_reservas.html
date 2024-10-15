@@ -1,0 +1,116 @@
+{% extends 'dashboard.html' %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h2 class="mb-4">Listado de Reservas</h2>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <form method="GET" action="{% url 'listar_reservas' %}">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Buscar..." name="search" value="{{ search_query }}">
+                    <button class="btn btn-custom" type="submit"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Cliente</th>
+                    <th>Mascota</th>
+                    <th>Servicios</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reserva in reservas %}
+                <tr>
+                    <td>{{ reserva.fecha }}</td>
+                    <td>{{ reserva.hora }}</td>
+                    <td>{{ reserva.cliente.nombre }} {{ reserva.cliente.apellidos }}</td>
+                    <td>{{ reserva.mascota.nombre }}</td>
+                    <td>
+                        {% for servicio in reserva.servicios.all %}
+                            {{ servicio.titulo }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <!-- Botón para ver detalles de la reserva -->
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#detalleReservaModal" data-reserva-id="{{ reserva.id }}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                        <!-- Botón para agregar historial médico -->
+                        <a href="{% url 'historial_medico' reserva.mascota.id %}" class="btn btn-danger btn-sm">
+                            <i class="fas fa-notes-medical"></i> Historial
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="detalleReservaModal" tabindex="-1" aria-labelledby="reservaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reservaModalLabel">Detalles de la Reserva</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detalleReservaBody">
+                <!-- Aquí se cargará el contenido dinámico -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Manejar el evento click del botón para abrir el modal y cargar los datos
+        document.querySelectorAll('button[data-bs-target="#detalleReservaModal"]').forEach(button => {
+            button.addEventListener('click', function () {
+                const reservaId = this.getAttribute('data-reserva-id');
+    
+                fetch(`/api/reserva/${reservaId}/detalles/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data); // Esto imprimirá la estructura completa de los datos en la consola del navegador
+                        const modalBody = document.querySelector('#detalleReservaModal .modal-body');
+                        modalBody.innerHTML = `
+                            <p><strong>Cliente:</strong> ${data.cliente.nombre} ${data.cliente.apellidos}</p>
+                            <p><strong>Correo Electrónico:</strong> ${data.cliente.correo}</p>
+                            <p><strong>Celular:</strong> ${data.cliente.celular}</p>
+                            <p><strong>Identificación:</strong> ${data.cliente.identificacion}</p>
+                            <p><strong>Fecha de Nacimiento:</strong> ${data.cliente.fecha_nacimiento}</p>
+    
+                            <hr>
+    
+                            <p><strong>Mascota:</strong> ${data.mascota.nombre}</p>
+                            <p><strong>Edad:</strong> ${data.mascota.edad} años</p>
+                            <p><strong>Fecha de Nacimiento:</strong> ${data.mascota.fecha_nacimiento}</p>
+                            <p><strong>Tipo:</strong> ${data.mascota.tipo}</p>
+                            <p><strong>Raza:</strong> ${data.mascota.raza}</p>
+                            <p><strong>Sexo:</strong> ${data.mascota.sexo}</p>
+    
+                            <hr>
+    
+                            <p><strong>Fecha de la Reserva:</strong> ${data.fecha}</p>
+                            <p><strong>Hora de la Reserva:</strong> ${data.hora}</p>
+                            <p><strong>Servicios:</strong> ${data.servicios.join(', ')}</p>
+                            <p><strong>Notas Adicionales:</strong> ${data.notas_adicionales || 'N/A'}</p>
+                        `;
+                    });
+            });
+        });
+    });    
+</script>
+{% endblock %}
