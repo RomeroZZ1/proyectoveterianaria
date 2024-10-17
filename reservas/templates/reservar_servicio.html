@@ -117,7 +117,16 @@
         }
         .select2-container .select2-dropdown {
             z-index: 9999;
-        }        
+        }     
+        .nav-tabs .nav-link {
+        color: white; /* Letra blanca */
+        background-color: green; /* Fondo verde */
+        }
+
+        .nav-tabs .nav-link.active {
+        color: white; /* Letra blanca cuando está activa */
+        background-color: darkgreen; /* Fondo verde oscuro cuando está activa */
+        }   
     </style>
 {% endblock %}
 
@@ -172,11 +181,11 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="identification" class="form-label">Identificación</label>
-                                    <input type="text" class="form-control" id="identification" name="identification" required>
+                                    <input type="number" class="form-control" id="identification" name="identification" required pattern="\d+" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                                 </div>
                                 <div class="mb-3">
                                     <label for="cellphone" class="form-label">Celular</label>
-                                    <input type="text" class="form-control" id="cellphone" name="cellphone" required>
+                                    <input type="number" class="form-control" id="cellphone" name="cellphone" required pattern="\d+" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                                 </div>
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Correo electrónico</label>
